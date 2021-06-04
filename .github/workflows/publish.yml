@@ -3,10 +3,10 @@ on:
   push:
     branches:
       - release
-environment:
-  name: Release
 jobs:
   publish:
+    environment:
+      name: Release
     name: build, pack & publish
     runs-on: ubuntu-latest
     steps:
