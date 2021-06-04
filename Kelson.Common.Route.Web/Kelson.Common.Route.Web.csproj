@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Kelson.Common.DataStructures\Kelson.Common.DataStructures.csproj" />
-    <ProjectReference Include="..\Kelson.Common\Kelson.Common.Route.csproj" />
+    <ProjectReference Include="..\Kelson.Common.Route\Kelson.Common.Route.csproj" />
   </ItemGroup>
 
 </Project>

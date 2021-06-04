@@ -35,21 +35,21 @@ namespace Kelson.Common.Route
             return false;
         });
 
-        public static OptionsCommandArgument<TConfig> Options<TConfig>(Func<TConfig> defaultConfig) where TConfig : IOptionsModel<TConfig> => new(defaultConfig);
+        //public static OptionsCommandArgument<TConfig> Options<TConfig>(Func<TConfig> defaultConfig) where TConfig : IOptionsModel<TConfig> => new(defaultConfig);
 
-        public static FlagDescriptor<TConfig> Flag<TConfig, TArg>(string name, TextArg<TArg> arg, Func<TConfig, TArg, TConfig> set)
-        {
-            bool MatchAndSet(ref ReadOnlySpan<char> text, ref TConfig result) 
-            {
-                if (arg.Matches(ref text, out TArg parameter))
-                {
-                    result = set(result, parameter);
-                    return true;
-                }
-                return false;
-            }
+        //public static FlagDescriptor<TConfig> Flag<TConfig, TArg>(string name, TextArg<TArg> arg, Func<TConfig, TArg, TConfig> set)
+        //{
+        //    bool MatchAndSet(ref ReadOnlySpan<char> text, ref TConfig result) 
+        //    {
+        //        if (arg.Matches(ref text, out TArg parameter))
+        //        {
+        //            result = set(result, parameter);
+        //            return true;
+        //        }
+        //        return false;
+        //    }
 
-            return new FlagDescriptor<TConfig>(name, MatchAndSet);
-        }
+        //    return new FlagDescriptor<TConfig>(name, MatchAndSet);
+        //}
     }
 }

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31025.218
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kelson.Common.Route", "Kelson.Common\Kelson.Common.Route.csproj", "{78105F59-2856-4CDA-AA29-7B9DA02D051B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kelson.Common.Route", "Kelson.Common.Route\Kelson.Common.Route.csproj", "{78105F59-2856-4CDA-AA29-7B9DA02D051B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BasicConsoleApp", "Demo\BasicConsoleApp\BasicConsoleApp.csproj", "{3F232A0E-CB15-4DDC-B1C5-BD4C0DCBC5C2}"
 EndProject

@@ -8,8 +8,4 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Kelson.Common.DataStructures\Kelson.Common.DataStructures.csproj" />
-  </ItemGroup>
-
 </Project>
