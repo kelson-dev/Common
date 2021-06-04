@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Kelson.Common\Kelson.Common.Route.csproj" />
+    <ProjectReference Include="..\..\Kelson.Common.Route\Kelson.Common.Route.csproj" />
   </ItemGroup>
 
 </Project>
