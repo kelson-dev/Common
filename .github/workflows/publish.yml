@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - release
+environment:
+  name: Release
 jobs:
   publish:
     name: build, pack & publish
