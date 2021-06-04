@@ -25,13 +25,4 @@ namespace Kelson.Common.Route.Args
 
         //public static implicit operator TextArg<T>(TextArgMatchDelegate<T> matcher) => new DelegateCommandArgument<T>(matcher);
     }
-
-    public abstract class ContextArg<T> : TextArg<T>
-    {
-        public abstract 
-
-        public abstract bool Matches(
-            ref ReadOnlySpan<char> text,
-            out T result);
-    }
 }
