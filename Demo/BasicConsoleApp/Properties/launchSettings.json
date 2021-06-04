@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BasicConsoleApp": {
+      "commandName": "Project",
+      "commandLineArgs": "add --subtraction --color Green 2 3"
+    }
+  }
+}
