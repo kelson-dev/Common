@@ -6,9 +6,9 @@ namespace Kelson.Common.Route.Args
     /// Accepts:
     ///     any text, returning that text
     /// </summary>
-    public class RemainingTextArgument : TextArg<string>
+    public class RemainingTextArgument<TC> : TextArg<TC, string>
     {
-        public override bool Matches(ref ReadOnlySpan<char> text, out string result)
+        public override bool Matches(TC context, ref ReadOnlySpan<char> text, out string result)
         {
             result = text.ToString();
             return true;

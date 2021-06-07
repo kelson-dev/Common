@@ -6,9 +6,9 @@ namespace Kelson.Common.Route.Args
     /// Accepts:
     ///     empty text, returning the remaining (empty) text
     /// </summary>
-    public class EmptyCommandArgument : TextArg<Unit>
+    public class EmptyCommandArgument<TC> : TextArg<TC>
     {
-        public override bool Matches(ref ReadOnlySpan<char> text, out Unit result)
+        public override bool Matches(TC context, ref ReadOnlySpan<char> text, out Unit result)
         {
             result = default;
             return text.IsEmpty;

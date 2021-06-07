@@ -12,9 +12,9 @@ namespace Kelson.Common.Route.Args
     ///     03/26/2022 +7
     ///     12/21/2012 12:00 PM -08:00
     /// </summary>
-    public class DateCommandArgument : TextArg<DateTimeOffset>
+    public class DateCommandArgument<TC> : TextArg<TC, DateTimeOffset>
     {
-        public override bool Matches(ref ReadOnlySpan<char> text, out DateTimeOffset result)
+        public override bool Matches(TC context, ref ReadOnlySpan<char> text, out DateTimeOffset result)
         {
             bool passed = DateTimeOffset.TryParse(text, out result);
             text = passed ? string.Empty : text;

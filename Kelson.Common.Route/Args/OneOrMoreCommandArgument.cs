@@ -8,19 +8,19 @@ namespace Kelson.Common.Route.Args
     /// Accepts:
     ///     A comma delimted list of one or more parameters, returning an array of those parameters
     /// </summary>
-    public class OneOrMoreCommandArgument<T> : TextArg<T[]>
+    public class OneOrMoreCommandArgument<TC, T> : TextArg<TC, T[]>
     {
-        private readonly TextArg<T> arg;
+        private readonly TextArg<TC, T> arg;
 
-        public OneOrMoreCommandArgument(TextArg<T> arg) => this.arg = arg;
+        public OneOrMoreCommandArgument(TextArg<TC, T> arg) => this.arg = arg;
 
-        public override bool Matches(ref ReadOnlySpan<char> text, out T[] result)
+        public override bool Matches(TC context, ref ReadOnlySpan<char> text, out T[] result)
         {
-            if (arg.Matches(ref text, out T item))
+            if (arg.Matches(context, ref text, out T item))
             {
                 List<T> items = new() { item };
                 text = text.TrimStart();
-                while (text.StartsWith(",") && arg.Matches(ref text, out item))
+                while (text.StartsWith(",") && arg.Matches(context, ref text, out item))
                     items.Add(item);
                 result = items.ToArray();
                 return true;
