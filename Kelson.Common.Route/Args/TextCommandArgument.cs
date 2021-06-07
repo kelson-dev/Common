@@ -8,19 +8,19 @@ namespace Kelson.Common.Route.Args
     ///     text that when trimmed begins with [textToMatch],
     ///     returning the remaining text that follows [textToMatch]
     /// </summary>
-    public class TextCommandArgument : TextArg<string>
+    public class TextCommandArgument<TC> : TextArg<TC>
     {
-        private readonly string match;
+        public readonly string Matched;
 
-        public TextCommandArgument(string textToMatch) => match = textToMatch;
+        public TextCommandArgument(string textToMatch) => Matched = textToMatch;
 
-        public override bool Matches(ref ReadOnlySpan<char> text, out string result)
+        public override bool Matches(TC context, ref ReadOnlySpan<char> text, out Unit result)
         {
-            bool passed = text.TryConsumeWord(match, out text);
-            result = passed ? text.ToString() : string.Empty;
+            result = default;
+            bool passed = text.TryConsumeWord(Matched, out text);
             return passed;
         }
 
-        public static implicit operator TextCommandArgument(string text) => new(text);
+        public static implicit operator TextCommandArgument<TC>(string text) => new(text);
     }
 }

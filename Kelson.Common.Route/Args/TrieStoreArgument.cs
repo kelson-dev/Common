@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Kelson.Common.Route.Args
 {
-    //public class TrieStoreArgument<T> : TextArg<T>
+    //public class TrieStoreArgument<T> : TextArg<TC, T>
     //{
     //    private readonly string delimeter;
     //    private readonly Trie<T> _trie = new();

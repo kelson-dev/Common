@@ -9,9 +9,9 @@ namespace Kelson.Common.Route.Args
     /// or
     ///     any ulong ID, returning that ID
     /// </summary>
-    public class LongCommandArgument : TextArg<ulong>
+    public class LongCommandArgument<TC> : TextArg<TC, ulong>
     {
-        public override bool Matches(ref ReadOnlySpan<char> text, out ulong result) =>
+        public override bool Matches(TC context, ref ReadOnlySpan<char> text, out ulong result) =>
             text.TryConsumeLong(out result, out text);
     }
 }
