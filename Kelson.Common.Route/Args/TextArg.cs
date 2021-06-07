@@ -9,6 +9,11 @@ namespace Kelson.Common.Route.Args
         public static TextArg<TC> operator &(TextArg<TC> arg, string text) =>
             arg.Before(new TextCommandArgument<TC>(text));
 
+        public static TextArg<TC> operator &(string text, TextArg<TC> arg) =>
+            new CompositeConditionArgument<TC, Unit, Unit>(
+                new TextCommandArgument<TC>(text).Then(arg),
+                arg);
+
         public new TextArg<TC> Before<T2>(TextArg<TC, T2> suffix) =>
             new CompositeConditionArgument<TC, Unit, T2>(this, suffix);
 
