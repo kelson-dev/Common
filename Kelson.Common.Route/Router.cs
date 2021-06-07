@@ -60,7 +60,11 @@ namespace Kelson.Common.Route
 
         public RouteBuilder<TC> WithCommand(IRouteCommand<TC> command) => new(textSelector, commands.Add(command));
 
-        public RouteBuilder<TC> When(Func<TC, bool> condition, RouteBuilder<TC> innerRouteBuilder) =>
+        /// <summary>
+        /// If the condition predicate passes, the inner route builder will be executed before the outer handler continues execution.
+        /// An aside will not shortcircuit the routing.
+        /// </summary>
+        public RouteBuilder<TC> ConditionalAside(Func<TC, bool> condition, RouteBuilder<TC> innerRouteBuilder) =>
             WithCommand(
                 new ConditionRouteCommand<TC>(
                     RouteQueryResult.RUN_AND_CONTIUE,
