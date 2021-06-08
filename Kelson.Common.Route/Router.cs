@@ -64,7 +64,7 @@ namespace Kelson.Common.Route
         /// If the condition predicate passes, the inner route builder will be executed before the outer handler continues execution.
         /// An aside will not shortcircuit the routing.
         /// </summary>
-        public RouteBuilder<TC> ConditionalAside(Func<TC, bool> condition, RouteBuilder<TC> innerRouteBuilder) =>
+        public RouteBuilder<TC> Aside(Func<TC, bool> condition, RouteBuilder<TC> innerRouteBuilder) =>
             WithCommand(
                 new ConditionRouteCommand<TC>(
                     RouteQueryResult.RUN_AND_CONTIUE,
@@ -74,8 +74,16 @@ namespace Kelson.Common.Route
         public BranchingRouteBuilder<TC> If(Func<TC, bool> condition, RouteBuilder<TC> innerRouteBuilder) =>
             new(this, condition, innerRouteBuilder);
 
+        
         public Condition<TC> When(TextArg<TC> condition) =>
             new(this, condition);
+
+        /// <summary>
+        /// If the condition argument is a match the inner operation will be executed before the outer handler continues execution.
+        /// An aside will not shortcircuit the routing.
+        /// </summary>
+        public Condition<TC> Aside(TextArg<TC> condition) =>
+            new(this, condition, RouteQueryResult.RUN_AND_CONTIUE);
 
         public ParameterCondition<TC, T1> On<T1>(TextArg<TC, T1> arg) =>
             new(this, arg);
