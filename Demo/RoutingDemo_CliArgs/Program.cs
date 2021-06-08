@@ -11,7 +11,7 @@ string joinedArgs(string[] cliArgs) => string.Join(" ", cliArgs);
 RouteBuilder<string[]> router() => new(joinedArgs);
 
 var route = router()
-    .ConditionalAside(context => context.Length == 10,
+    .Aside(context => context.Length == 10,
         router().On(REMAINING).Do(LengthWas10))
     .On("echo" & REMAINING)
         .Do(Echo)
