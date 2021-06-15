@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Kelson.Common.Parsing;
 
 namespace Kelson.Common.Route.Args
@@ -15,6 +16,14 @@ namespace Kelson.Common.Route.Args
             bool passed = text.TryConsumeQuote(out ReadOnlySpan<char> quote, out text);
             result = passed ? quote.ToString() : string.Empty;
             return passed;
+        }
+
+        public override string Description => $"Matches quoted text";
+
+        public override IEnumerable<string> Examples()
+        {
+            yield return "\"a\"";
+            yield return $"\"Hello World'\nNew Line\"";
         }
     }
 }

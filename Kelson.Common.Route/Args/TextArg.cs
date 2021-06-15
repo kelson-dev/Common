@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Kelson.Common.Route.Args
 {
@@ -25,11 +26,17 @@ namespace Kelson.Common.Route.Args
 
     public abstract class TextArg<TC, T>
     {
+        public static string CORE_ARG_DELIMETER = " ";
+
         public abstract bool Matches(
             TC context,
             ref ReadOnlySpan<char> text,
             out T result);
 
+        public virtual string Name => GetType().Name;
+        public abstract string Description { get; }
+        public abstract IEnumerable<string> Examples();
+        
         public static TextArg<TC, T> operator &(string text, TextArg<TC, T> arg) =>
             new CompositeRightArgument<TC, Unit, T>(
                 new TextCommandArgument<TC>(text),

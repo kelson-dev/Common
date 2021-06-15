@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 namespace Kelson.Common.Route
 {
     using Args;
+    using Kelson.Common.Route.Docs;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Linq;
@@ -11,12 +12,16 @@ namespace Kelson.Common.Route
     public class Router<TC>
     {
         internal readonly Func<TC, string> textSelector;
-        internal readonly IRouteCommand<TC>[] commands;
+        internal readonly RouteCommand<TC>[] commands;
+        private readonly string? name;
+        private readonly string? description;
 
-        internal Router(Func<TC, string> textSelector, IRouteCommand<TC>[] commands)
+        internal Router(Func<TC, string> textSelector, RouteCommand<TC>[] commands, string? name, string? description)
         {
             this.textSelector = textSelector;
             this.commands = commands;
+            this.name = name;
+            this.description = description;
         }
 
         public async Task Handle(TC context)
@@ -37,42 +42,68 @@ namespace Kelson.Common.Route
                 }
             }
         }
+
+        public RouteDoc BuildDocs() => new(
+            name,
+            description,
+            Array.Empty<string>(),
+            commands.Select(c => c.BuildDoc()).ToArray());
+        
     }
 
     public class RouteBuilder<TC>
     {
         internal readonly Func<TC, string> textSelector;
-        internal readonly ImmutableList<IRouteCommand<TC>> commands;
+        internal readonly ImmutableList<RouteCommand<TC>> commands;
+
+        private string? name;
+        private string? description;
 
         public RouteBuilder(Func<TC, string> textSelector)
         {
             this.textSelector = textSelector;
-            this.commands = ImmutableList<IRouteCommand<TC>>.Empty;
+            this.commands = ImmutableList<RouteCommand<TC>>.Empty;
         }
 
-        private RouteBuilder(Func<TC, string> textSelector, ImmutableList<IRouteCommand<TC>> commands)
+        private RouteBuilder(Func<TC, string> textSelector, ImmutableList<RouteCommand<TC>> commands)
         {
             this.textSelector = textSelector;
             this.commands = commands;
         }
 
-        public Router<TC> Build() => new Router<TC>(textSelector, commands.ToArray());
+        public RouteBuilder<TC> Named(string name)
+        {
+            this.name = name;
+            return this;
+        }
 
-        public RouteBuilder<TC> WithCommand(IRouteCommand<TC> command) => new(textSelector, commands.Add(command));
+        public RouteBuilder<TC> DescribedAs(string desc)
+        {
+            this.description = desc;
+            return this;
+        }
+
+
+        public Router<TC> Build() => new(textSelector, commands.ToArray(), name, description);
+
+        public RouteBuilder<TC> WithCommand(RouteCommand<TC> command) => new RouteBuilder<TC>(textSelector, commands.Add(command))
+                .Named(name)
+                .DescribedAs(description);
 
         /// <summary>
         /// If the condition predicate passes, the inner route builder will be executed before the outer handler continues execution.
         /// An aside will not shortcircuit the routing.
         /// </summary>
-        public RouteBuilder<TC> Aside(Func<TC, bool> condition, RouteBuilder<TC> innerRouteBuilder) =>
+        public RouteBuilder<TC> Aside(Func<TC, bool> condition, RouteBuilder<TC> route, string? name = null, string? description = null) =>
             WithCommand(
                 new ConditionRouteCommand<TC>(
                     RouteQueryResult.RUN_AND_CONTIUE,
                     condition,
-                    innerRouteBuilder));
+                    route.Build(),
+                    name ?? route.name,
+                    description ?? route.description));
 
-        public BranchingRouteBuilder<TC> If(Func<TC, bool> condition, RouteBuilder<TC> innerRouteBuilder) =>
-            new(this, condition, innerRouteBuilder);
+        public IfBranchRouteSelector<TC> If(Func<TC, bool> condition) => new(this, condition);
 
         
         public Condition<TC> When(TextArg<TC> condition) =>
@@ -125,82 +156,209 @@ namespace Kelson.Common.Route
         }
     }
 
-    public class BranchingRouteBuilder<TC>
+    public record IfBranchRouteSelector<TC>(RouteBuilder<TC> Parent, Func<TC, bool> Condition)
     {
-        public RouteBuilder<TC> Return { get; private set; }
+        public IfBranchDocSelector<TC> Route(RouteBuilder<TC> route) =>
+            new(Parent, Condition, route.Build());
+    }
 
-        private readonly Func<TC, bool> firstCondition;
-        private readonly RouteBuilder<TC> firstRouter;
-        private readonly ImmutableList<(Func<TC, bool>, RouteBuilder<TC>)> elseBranches;
+    public record IfBranchDocSelector<TC>(
+        RouteBuilder<TC> Parent, 
+        Func<TC, bool> Condition, 
+        Router<TC> Router, 
+        string? Name = null, 
+        string? Description = null, 
+        string[]? Examples = null)
+    {
+        public ElseIfBranchRouteSelector<TC> ElseIf(Func<TC, bool> condition) => new(Parent, this, null, condition);
 
+        public ElseBranchDocSelector<TC> Else(RouteBuilder<TC> router) => new(Parent, this, null, router.Build());
 
-        internal BranchingRouteBuilder(RouteBuilder<TC> outer, Func<TC, bool> firstCondition, RouteBuilder<TC> firstRouter)
+        public RouteBuilder<TC> End()
         {
-            Return = outer;
-            elseBranches = ImmutableList<(Func<TC, bool>, RouteBuilder<TC>)>.Empty;
-        }
-        
-        internal BranchingRouteBuilder(BranchingRouteBuilder<TC> previous, Func<TC, bool> elseCondition, RouteBuilder<TC> elseRouter)
-        {
-            Return = previous.Return;
-            firstCondition = previous.firstCondition;
-            firstRouter = previous.firstRouter;
-            elseBranches = previous.elseBranches.Add((elseCondition, elseRouter));
-        }
-
-        public BranchingRouteBuilder<TC> ElseIf(Func<TC, bool> condition, RouteBuilder<TC> innerRouteBuilder) =>
-            new(this, condition, innerRouteBuilder);
-
-        public RouteBuilder<TC> Else(RouteBuilder<TC> elseRouter)
-        {
-            var builder = new RouteBuilder<TC>(Return.textSelector);
+            var builder = Parent;
             builder = builder.WithCommand(
                 new ConditionRouteCommand<TC>(
                     RouteQueryResult.RUN_AND_EXIT,
-                    firstCondition,
-                    firstRouter));
-            foreach (var (condition, router) in elseBranches)
-                builder = builder.WithCommand(
-                    new ConditionRouteCommand<TC>(
-                        RouteQueryResult.RUN_AND_EXIT, 
-                        condition, 
-                        router));
-            builder = builder.WithCommand(new SubrouterCommand<TC>(elseRouter));
+                    Condition,
+                    Router,
+                    Name,
+                    Description));
+
             return builder;
         }
 
+        public IfBranchDocSelector<TC> Named(string name) => this with { Name = name };
+        public IfBranchDocSelector<TC> DescribedAs(string desc) => this with { Description = desc };
+        public IfBranchDocSelector<TC> WithExamples(params string[] examples) => this with { Examples = examples };
     }
+
+    public record ElseIfBranchRouteSelector<TC>(
+        RouteBuilder<TC> Parent,
+        IfBranchDocSelector<TC> First,
+        ElseIfBranchDocSelector<TC>? Previous,
+        Func<TC, bool> Condition)
+    {
+        public ElseIfBranchDocSelector<TC> Route(RouteBuilder<TC> router) => new(Parent, First, Previous, Condition, router.Build());
+    };
+
+    public record ElseIfBranchDocSelector<TC>(
+        RouteBuilder<TC> Parent,
+        IfBranchDocSelector<TC> First,
+        ElseIfBranchDocSelector<TC>? Previous,
+        Func<TC, bool> Condition,
+        Router<TC> Router,
+        string? Name = null,
+        string? Description = null,
+        string[]? Examples = null)
+    {
+        public ElseIfBranchRouteSelector<TC> ElseIf(Func<TC, bool> condition) => new(Parent, First, this, condition);
+
+        public ElseBranchDocSelector<TC> Else(RouteBuilder<TC> router) => new(Parent, First, this, router.Build());
+
+        public RouteBuilder<TC> End()
+        {
+            var builder = Parent;
+            builder = builder.WithCommand(
+                new ConditionRouteCommand<TC>(
+                    RouteQueryResult.RUN_AND_EXIT,
+                    First.Condition,
+                    First.Router,
+                    First.Name,
+                    First.Description));
+
+            static void AddElseIfBranch(ElseIfBranchDocSelector<TC>? selector, ref RouteBuilder<TC> builder)
+            {
+                if (selector == null)
+                    return;
+                AddElseIfBranch(selector.Previous, ref builder);
+                builder = builder.WithCommand(
+                    new ConditionRouteCommand<TC>(
+                        RouteQueryResult.RUN_AND_EXIT,
+                        selector.Condition,
+                        selector.Router,
+                        selector.Name,
+                        selector.Description));
+            }
+
+            AddElseIfBranch(Previous, ref builder);
+
+            return builder;
+        }
+
+        public ElseIfBranchDocSelector<TC> Named(string name) => this with { Name = name };
+        public ElseIfBranchDocSelector<TC> DescribedAs(string desc) => this with { Description = desc };
+        public ElseIfBranchDocSelector<TC> WithExamples(params string[] examples) => this with { Examples = examples };
+    };
+
+    public record ElseBranchDocSelector<TC>(
+        RouteBuilder<TC> Parent,
+        IfBranchDocSelector<TC> First, 
+        ElseIfBranchDocSelector<TC>? Previous, 
+        Router<TC> Router, 
+        string? Name = null, 
+        string? Description = null, 
+        string[]? Examples = null)
+    {
+        public RouteBuilder<TC> End()
+        {
+            var builder = Parent;
+            builder = builder.WithCommand(
+                new ConditionRouteCommand<TC>(
+                    RouteQueryResult.RUN_AND_EXIT,
+                    First.Condition,
+                    First.Router,
+                    First.Name,
+                    First.Description));
+
+            static void AddElseIfBranch(ElseIfBranchDocSelector<TC>? selector, ref RouteBuilder<TC> builder)
+            {
+                if (selector == null)
+                    return;
+                AddElseIfBranch(selector.Previous, ref builder);
+                builder = builder.WithCommand(
+                    new ConditionRouteCommand<TC>(
+                        RouteQueryResult.RUN_AND_EXIT,
+                        selector.Condition,
+                        selector.Router,
+                        selector.Name,
+                        selector.Description));
+            }
+
+            AddElseIfBranch(Previous, ref builder);
+
+            builder = builder.WithCommand(new SubrouterCommand<TC>(Router, Name, Description));
+            return builder;
+        }
+
+        public ElseBranchDocSelector<TC> Named(string name) => this with { Name = name };
+        public ElseBranchDocSelector<TC> DescribedAs(string desc) => this with { Description = desc };
+        public ElseBranchDocSelector<TC> WithExamples(params string[] examples) => this with { Examples = examples };
+    };
 
     /// <summary>
     /// Handles the inner route if the predicate passes.
     /// Returns the constructor specified RouteQueryResult when the predicate passes.
     /// </summary>
-    public class ConditionRouteCommand<TC> : IRouteCommand<TC>
+    public class ConditionRouteCommand<TC> : RouteCommand<TC>
     {
         private readonly Func<TC, bool> predicate;
         private readonly Router<TC> router;
         private readonly RouteQueryResult onPass;
+        private readonly List<string> _examples = new();
 
-        public ConditionRouteCommand(RouteQueryResult onPass, Func<TC, bool> predicate, RouteBuilder<TC> router) => 
-            (this.onPass, this.predicate, this.router) = 
-            (onPass, predicate, router.Build());
+        public ConditionRouteCommand(RouteQueryResult onPass, Func<TC, bool> predicate, Router<TC> router, string? name, string? description) => 
+            (this.onPass, this.predicate, this.router, Name, Description) = 
+            (onPass, predicate, router, name, description);
 
-        public RouteQueryResult Query(TC context, ReadOnlySpan<char> text, out Func<TC, Task> action)
+        public override IEnumerable<string> Examples()
+        {
+            yield break;
+        }
+
+        public override RouteQueryResult Query(TC context, ReadOnlySpan<char> text, out Func<TC, Task> action)
         {
             action = router.Handle;
             return predicate(context)
                 ? onPass
                 : RouteQueryResult.DO_NOT_RUN;
         }
+
+        public override RouteDoc BuildDoc()
+        {
+            var inner = router.BuildDocs();
+            return new RouteDoc(
+                Name ?? inner.Name,
+                Description ?? inner.Description,
+                inner.Examples,
+                inner.Subcommands);
+        }
+            
     }
 
-    public class SubrouterCommand<TC> : IRouteCommand<TC>
+    public class SubrouterCommand<TC> : RouteCommand<TC>
     {
         private readonly Router<TC> router;
 
-        public SubrouterCommand(RouteBuilder<TC> router) => this.router = router.Build();
+        public SubrouterCommand(Router<TC> router, string? name, string? description) => 
+            (this.router, Name, Description) = (router, name, description);
 
-        public RouteQueryResult Query(TC context, ReadOnlySpan<char> text, out Func<TC, Task> action)
+        public override IEnumerable<string> Examples()
+        {
+            yield break;
+        }
+
+        public override RouteDoc BuildDoc()
+        {
+            var inner = router.BuildDocs();
+            return new RouteDoc(
+                Name ?? inner.Name,
+                Description ?? inner.Description,
+                inner.Examples,
+                inner.Subcommands);
+        }
+
+        public override RouteQueryResult Query(TC context, ReadOnlySpan<char> text, out Func<TC, Task> action)
         {
             action = router.Handle;
             return RouteQueryResult.RUN_AND_EXIT;

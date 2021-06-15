@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Kelson.Common.Route.Args
 {
@@ -17,6 +18,16 @@ namespace Kelson.Common.Route.Args
              || option2.Matches(context, ref content, out result);
             text = passed ? text : content;
             return passed;
+        }
+
+        public override string Description => $"Matches either {{left}} or {{right}}\nLeft: {option1.Description}\nRight:{option2.Description}";
+
+        public override IEnumerable<string> Examples()
+        {
+            foreach (var eL in option1.Examples())
+                yield return eL;
+            foreach (var eR in option2.Examples())
+                yield return eR;
         }
     }
 }
