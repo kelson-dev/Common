@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Kelson.Common.Route.Args
 {
@@ -12,6 +13,13 @@ namespace Kelson.Common.Route.Args
         {
             result = text.ToString();
             return true;
+        }
+
+        public override string Description => $"Matches any remaining text";
+
+        public override IEnumerable<string> Examples()
+        {
+            yield return "lorem ipsum";
         }
     }
 }

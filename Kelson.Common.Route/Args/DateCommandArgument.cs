@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Kelson.Common.Route.Args
 {
@@ -19,6 +20,17 @@ namespace Kelson.Common.Route.Args
             bool passed = DateTimeOffset.TryParse(text, out result);
             text = passed ? string.Empty : text;
             return passed;
+        }
+
+        public override string Description => $"Matches dates and times";
+
+        public override IEnumerable<string> Examples()
+        {
+            yield return "Thu April 10, 2021";
+            yield return "03/26/2022";
+            yield return "11:36 PM";
+            yield return "03/26/2022 +7";
+            yield return "12/21/2012 12:00 PM -08:00";
         }
     }
 }

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RoutingDemo_CliArgs": {
+      "commandName": "Project",
+      "commandLineArgs": "add 2 3"
+    }
+  }
+}

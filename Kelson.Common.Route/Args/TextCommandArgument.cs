@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Kelson.Common.Parsing;
 
 namespace Kelson.Common.Route.Args
@@ -22,5 +23,12 @@ namespace Kelson.Common.Route.Args
         }
 
         public static implicit operator TextCommandArgument<TC>(string text) => new(text);
+
+        public override string Description => $"Matches on the text {Matched}";
+
+        public override IEnumerable<string> Examples()
+        {
+            yield return $"{Matched}";
+        }
     }
 }
