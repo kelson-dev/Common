@@ -20,7 +20,7 @@ jobs:
       # Publish
       - name: publish on version change
         id: publish_nuget
-        uses: kelson-dev/publish-nuget@v2.5.6
+        uses: kelson-dev/publish-nuget-fixed@2.5.6
         with:
           # Filepath of the project to be packaged, relative to root of repository
           PROJECT_FILE_PATH: Kelson.Common.Route/Kelson.Common.Route.csproj
