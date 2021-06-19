@@ -16,7 +16,7 @@ namespace Kelson.Common.Route.Args
             text.TryConsumeLong(out result, out text);
 
         public override string Description => $"Matches on large positive whole numbers [0, {int.MaxValue}]";
-
+        public override string Syntax => $"[unsigned 64 bit integer]";
         public override IEnumerable<string> Examples()
         {
             yield return "0";

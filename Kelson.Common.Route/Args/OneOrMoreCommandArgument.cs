@@ -33,6 +33,7 @@ namespace Kelson.Common.Route.Args
         }
 
         public override string Description => $"Matches on one or more of {{arg}}.\nArg:{arg.Description}";
+        public override string Syntax => $"[{arg.Syntax}](,[{arg.Syntax}])*";
 
         public override IEnumerable<string> Examples()
         {

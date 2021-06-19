@@ -24,9 +24,10 @@ namespace Kelson.Common.Route
             this.description = description;
         }
 
-        public async Task Handle(TC context)
+        public async Task Handle(TC context, int start = 0)
         {
             var text = textSelector(context);
+            text = text[start..];
             foreach (var command in commands)
             {
                 switch (command.Query(context, text, out Func<TC, Task> execute))
@@ -46,6 +47,7 @@ namespace Kelson.Common.Route
         public RouteDoc BuildDocs() => new(
             name,
             description,
+            "",
             Array.Empty<string>(),
             commands.Select(c => c.BuildDoc()).ToArray());
         
@@ -98,14 +100,16 @@ namespace Kelson.Common.Route
             WithCommand(
                 new ConditionRouteCommand<TC>(
                     RouteQueryResult.RUN_AND_CONTIUE,
-                    condition,
+                    new PredicateCommandArgument<TC>(condition),
                     route.Build(),
                     name ?? route.name,
                     description ?? route.description));
 
         public IfBranchRouteSelector<TC> If(Func<TC, bool> condition) => new(this, condition);
 
-        
+        public IfBranchRouteSelector<TC> If(TextArg<TC> condition) => new(this, condition);
+
+
         public Condition<TC> When(TextArg<TC> condition) =>
             new(this, condition);
 
@@ -156,21 +160,23 @@ namespace Kelson.Common.Route
         }
     }
 
-    public record IfBranchRouteSelector<TC>(RouteBuilder<TC> Parent, Func<TC, bool> Condition)
+    public record IfBranchRouteSelector<TC>(RouteBuilder<TC> Parent, TextArg<TC> Condition)
     {
+        public IfBranchRouteSelector(RouteBuilder<TC> parent, Func<TC, bool> condition) : this(parent, new PredicateCommandArgument<TC>(condition)){}
+
         public IfBranchDocSelector<TC> Route(RouteBuilder<TC> route) =>
             new(Parent, Condition, route.Build());
     }
 
     public record IfBranchDocSelector<TC>(
-        RouteBuilder<TC> Parent, 
-        Func<TC, bool> Condition, 
+        RouteBuilder<TC> Parent,
+        TextArg<TC> Condition, 
         Router<TC> Router, 
         string? Name = null, 
         string? Description = null, 
         string[]? Examples = null)
     {
-        public ElseIfBranchRouteSelector<TC> ElseIf(Func<TC, bool> condition) => new(Parent, this, null, condition);
+        public ElseIfBranchRouteSelector<TC> ElseIf(Func<TC, bool> condition) => new(Parent, this, null, new PredicateCommandArgument<TC>(condition));
 
         public ElseBranchDocSelector<TC> Else(RouteBuilder<TC> router) => new(Parent, this, null, router.Build());
 
@@ -197,7 +203,7 @@ namespace Kelson.Common.Route
         RouteBuilder<TC> Parent,
         IfBranchDocSelector<TC> First,
         ElseIfBranchDocSelector<TC>? Previous,
-        Func<TC, bool> Condition)
+        TextArg<TC> Condition)
     {
         public ElseIfBranchDocSelector<TC> Route(RouteBuilder<TC> router) => new(Parent, First, Previous, Condition, router.Build());
     };
@@ -206,13 +212,13 @@ namespace Kelson.Common.Route
         RouteBuilder<TC> Parent,
         IfBranchDocSelector<TC> First,
         ElseIfBranchDocSelector<TC>? Previous,
-        Func<TC, bool> Condition,
+        TextArg<TC> Condition,
         Router<TC> Router,
         string? Name = null,
         string? Description = null,
         string[]? Examples = null)
     {
-        public ElseIfBranchRouteSelector<TC> ElseIf(Func<TC, bool> condition) => new(Parent, First, this, condition);
+        public ElseIfBranchRouteSelector<TC> ElseIf(Func<TC, bool> condition) => new(Parent, First, this, new PredicateCommandArgument<TC>(condition));
 
         public ElseBranchDocSelector<TC> Else(RouteBuilder<TC> router) => new(Parent, First, this, router.Build());
 
@@ -302,12 +308,12 @@ namespace Kelson.Common.Route
     /// </summary>
     public class ConditionRouteCommand<TC> : RouteCommand<TC>
     {
-        private readonly Func<TC, bool> predicate;
+        private readonly TextArg<TC> predicate;
         private readonly Router<TC> router;
         private readonly RouteQueryResult onPass;
         private readonly List<string> _examples = new();
 
-        public ConditionRouteCommand(RouteQueryResult onPass, Func<TC, bool> predicate, Router<TC> router, string? name, string? description) => 
+        public ConditionRouteCommand(RouteQueryResult onPass, TextArg<TC> predicate, Router<TC> router, string? name, string? description) => 
             (this.onPass, this.predicate, this.router, Name, Description) = 
             (onPass, predicate, router, name, description);
 
@@ -318,10 +324,16 @@ namespace Kelson.Common.Route
 
         public override RouteQueryResult Query(TC context, ReadOnlySpan<char> text, out Func<TC, Task> action)
         {
-            action = router.Handle;
-            return predicate(context)
+            
+            var initial = text;
+            var result = predicate.Matches(context, ref text, out Unit _)
                 ? onPass
                 : RouteQueryResult.DO_NOT_RUN;
+            var skipped = initial.Length - text.Length;
+            action = skipped == 0
+                ? (c) => router.Handle(c)
+                : (c) => router.Handle(c, skipped);
+            return result;
         }
 
         public override RouteDoc BuildDoc()
@@ -330,10 +342,17 @@ namespace Kelson.Common.Route
             return new RouteDoc(
                 Name ?? inner.Name,
                 Description ?? inner.Description,
+                AutoArgSyntax(),
                 inner.Examples,
                 inner.Subcommands);
         }
-            
+
+        public override IEnumerable<ITextArg> Args()
+        {
+            yield break;
+        }
+
+        
     }
 
     public class SubrouterCommand<TC> : RouteCommand<TC>
@@ -354,13 +373,19 @@ namespace Kelson.Common.Route
             return new RouteDoc(
                 Name ?? inner.Name,
                 Description ?? inner.Description,
+                AutoArgSyntax(),
                 inner.Examples,
                 inner.Subcommands);
         }
 
+        public override IEnumerable<ITextArg> Args()
+        {
+            yield break;
+        }
+
         public override RouteQueryResult Query(TC context, ReadOnlySpan<char> text, out Func<TC, Task> action)
         {
-            action = router.Handle;
+            action = (c) => router.Handle(c);
             return RouteQueryResult.RUN_AND_EXIT;
         }
     }

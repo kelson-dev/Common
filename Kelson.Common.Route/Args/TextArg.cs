@@ -5,6 +5,14 @@ namespace Kelson.Common.Route.Args
 {
     public delegate bool TextArgMatchDelegate<TC, T>(TC context, ref ReadOnlySpan<char> text, out T result);
 
+    public interface ITextArg
+    {
+        string Name => GetType().Name;
+        string Description { get; }
+        string Syntax { get; }
+        IEnumerable<string> Examples();
+    }
+
     public abstract class TextArg<TC> : TextArg<TC, Unit>
     {
         public static TextArg<TC> operator &(TextArg<TC> arg, string text) =>
@@ -24,7 +32,7 @@ namespace Kelson.Common.Route.Args
                 arg);
     }
 
-    public abstract class TextArg<TC, T>
+    public abstract class TextArg<TC, T> : ITextArg
     {
         public static string CORE_ARG_DELIMETER = " ";
 
@@ -35,6 +43,7 @@ namespace Kelson.Common.Route.Args
 
         public virtual string Name => GetType().Name;
         public abstract string Description { get; }
+        public abstract string Syntax { get; }
         public abstract IEnumerable<string> Examples();
         
         public static TextArg<TC, T> operator &(string text, TextArg<TC, T> arg) =>
@@ -60,7 +69,5 @@ namespace Kelson.Common.Route.Args
 
         public static TextArg<TC, T> operator |(TextArg<TC, T> arg1, TextArg<TC, T> arg2) =>
             new EitherCommandArguement<TC, T>(arg1, arg2);
-
-        //public static implicit operator TextArg<TC, T>(TextArgMatchDelegate<T> matcher) => new DelegateCommandArgument<T>(matcher);
     }
 }

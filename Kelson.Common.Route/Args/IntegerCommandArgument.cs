@@ -16,6 +16,7 @@ namespace Kelson.Common.Route.Args
             text.TryConsumeInteger(out result, out text);
 
         public override string Description => $"Matches on whole numbers [{int.MinValue}, {int.MaxValue}]";
+        public override string Syntax => $"[signed 32 bit integer]";
 
         public override IEnumerable<string> Examples()
         {
