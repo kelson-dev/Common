@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
 	<Nullable>enable</Nullable>
-    <Version>1.0.5-PREVIEW</Version>
+    <Version>1.0.6-PREVIEW</Version>
     <Authors>Kelson Ball</Authors>
     <Product />
     <Company />
