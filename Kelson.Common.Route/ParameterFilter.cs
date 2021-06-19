@@ -49,14 +49,29 @@ namespace Kelson.Common.Route
             }
         }
 
-        public virtual RouteDoc BuildDoc() => new(Name, Description, Examples().ToArray(), null);
+        public abstract IEnumerable<ITextArg> Args();
 
+        public virtual RouteDoc BuildDoc() => new(Name, Description, AutoArgSyntax(), Examples().ToArray(), null);
 
+        public override string ToString()
+        {
+            if (Name is string named)
+                return named;
+            else
+                return base.ToString()!;
+        }
+
+        protected string AutoArgSyntax() => string.Join(" ", Args().Select(a => a.Syntax));
     }
 
     public class Filter<TC> : RouteCommand<TC>
     {
         public TextArg<TC> Condition { get; init; }
+
+        public override IEnumerable<ITextArg> Args()
+        {
+            yield return Condition;
+        }
 
         public Func<TC, Task> Action { get; init; }
 
@@ -87,6 +102,11 @@ namespace Kelson.Common.Route
     {
         public TextArg<TC, T1> Condition1 { get; init; }
 
+        public override IEnumerable<ITextArg> Args()
+        {
+            yield return Condition1;
+        }
+
         public Func<TC, T1, Task> Action { get; init; }
 
         public ParameterFilter(Func<TC, T1, Task> command) => Action = command;
@@ -102,6 +122,12 @@ namespace Kelson.Common.Route
     {
         public TextArg<TC, T1> Condition1 { get; init; }
         public TextArg<TC, T2> Condition2 { get; init; }
+
+        public override IEnumerable<ITextArg> Args()
+        {
+            yield return Condition1;
+            yield return Condition2;
+        }
 
         public Func<TC, T1, T2, Task> Action { get; init; }
 
@@ -124,6 +150,13 @@ namespace Kelson.Common.Route
         public TextArg<TC, T1> Condition1 { get; init; }
         public TextArg<TC, T2> Condition2 { get; init; }
         public TextArg<TC, T3> Condition3 { get; init; }
+
+        public override IEnumerable<ITextArg> Args()
+        {
+            yield return Condition1;
+            yield return Condition2;
+            yield return Condition3;
+        }
 
         public Func<TC, T1, T2, T3, Task> Action { get; init; }
 
@@ -149,6 +182,14 @@ namespace Kelson.Common.Route
         public TextArg<TC, T2> Condition2 { get; init; }
         public TextArg<TC, T3> Condition3 { get; init; }
         public TextArg<TC, T4> Condition4 { get; init; }
+
+        public override IEnumerable<ITextArg> Args()
+        {
+            yield return Condition1;
+            yield return Condition2;
+            yield return Condition3;
+            yield return Condition4;
+        }
 
         public Func<TC, T1, T2, T3, T4, Task> Action { get; init; }
 
@@ -177,6 +218,15 @@ namespace Kelson.Common.Route
         public TextArg<TC, T3> Condition3 { get; init; }
         public TextArg<TC, T4> Condition4 { get; init; }
         public TextArg<TC, T5> Condition5 { get; init; }
+
+        public override IEnumerable<ITextArg> Args()
+        {
+            yield return Condition1;
+            yield return Condition2;
+            yield return Condition3;
+            yield return Condition4;
+            yield return Condition5;
+        }
 
         public Func<TC, T1, T2, T3, T4, T5, Task> Action { get; init; }
 
@@ -207,6 +257,16 @@ namespace Kelson.Common.Route
         public TextArg<TC, T4> Condition4 { get; init; }
         public TextArg<TC, T5> Condition5 { get; init; }
         public TextArg<TC, T6> Condition6 { get; init; }
+
+        public override IEnumerable<ITextArg> Args()
+        {
+            yield return Condition1;
+            yield return Condition2;
+            yield return Condition3;
+            yield return Condition4;
+            yield return Condition5;
+            yield return Condition6;
+        }
 
         public Func<TC, T1, T2, T3, T4, T5, T6, Task> Action { get; init; }
 

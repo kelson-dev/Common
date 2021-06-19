@@ -16,6 +16,7 @@ namespace Kelson.Common.Route.Args
         }
 
         public override string Description => $"Matches any remaining text";
+        public override string Syntax => "[text]*";
 
         public override IEnumerable<string> Examples()
         {

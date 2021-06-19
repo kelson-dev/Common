@@ -19,11 +19,12 @@ namespace Kelson.Common.Route.Args
         }
 
         public override string Description => $"Matches quoted text";
+        public override string Syntax => "\"[text]\"";
 
         public override IEnumerable<string> Examples()
         {
             yield return "\"a\"";
-            yield return $"\"Hello World'\nNew Line\"";
+            yield return $"\"Hello World'\\nNew Line\"";
         }
     }
 }

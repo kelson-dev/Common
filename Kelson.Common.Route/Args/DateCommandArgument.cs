@@ -23,6 +23,7 @@ namespace Kelson.Common.Route.Args
         }
 
         public override string Description => $"Matches dates and times";
+        public override string Syntax => "[datetime]";
 
         public override IEnumerable<string> Examples()
         {

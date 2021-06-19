@@ -8,6 +8,9 @@ namespace Kelson.Common.Route.Args
     {
         private readonly TextArgMatchDelegate<TC, T> matcher;
 
+        private string _syntax = $"<custom delegate>";
+        public override string Syntax => _syntax;
+
         public DelegateCommandArgument(TextArgMatchDelegate<TC, T> matcher, string description = null) => 
             (this.matcher, _description) = (matcher, description ?? "[Descrpition for this parameter has not been configured]");
 

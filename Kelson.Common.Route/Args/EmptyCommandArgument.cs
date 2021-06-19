@@ -16,6 +16,7 @@ namespace Kelson.Common.Route.Args
         }
 
         public override string Description => $"Matches on the end of input";
+        public override string Syntax => string.Empty;
 
         public override IEnumerable<string> Examples()
         {

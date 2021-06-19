@@ -18,6 +18,7 @@ namespace Kelson.Common.Route.Args
         }
 
         public override string Description => $"Requires {{left}} then {{right}}, and uses output of {{right}}.\nLeft: {arg1.Description}\nRight:{arg2.Description}";
+        public override string Syntax => $"{arg1.Syntax} {arg2.Syntax}";
 
         public override IEnumerable<string> Examples()
         {
@@ -41,6 +42,7 @@ namespace Kelson.Common.Route.Args
         }
 
         public override string Description => $"Requires {{left}} then {{right}}, and uses output of {{left}}.\nLeft: {arg1.Description}\nRight:{arg2.Description}";
+        public override string Syntax => $"{arg1.Syntax} {arg2.Syntax}";
 
         public override IEnumerable<string> Examples()
         {
@@ -65,6 +67,7 @@ namespace Kelson.Common.Route.Args
         }
 
         public override string Description => $"Requires {{left}} then {{right}}.\nLeft: {arg1.Description}\nRight:{arg2.Description}";
+        public override string Syntax => $"{arg1.Syntax} {arg2.Syntax}";
 
         public override IEnumerable<string> Examples()
         {

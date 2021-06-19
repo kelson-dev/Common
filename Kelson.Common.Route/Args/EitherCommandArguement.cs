@@ -21,6 +21,7 @@ namespace Kelson.Common.Route.Args
         }
 
         public override string Description => $"Matches either {{left}} or {{right}}\nLeft: {option1.Description}\nRight:{option2.Description}";
+        public override string Syntax => $"[{option1.Syntax}|{option2.Syntax}]";
 
         public override IEnumerable<string> Examples()
         {
