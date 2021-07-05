@@ -106,7 +106,7 @@ jobs:
 
       # Publish
       - name: Publish Kelson.Common.DataStructures
-        id: publish_nuget_postgres_generators
+        id: publish_nuget_datastructures
         uses: kelson-dev/publish-nuget-fixed@2.5.6
         with:
           # Filepath of the project to be packaged, relative to root of repository
