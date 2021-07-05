@@ -27,9 +27,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kelson.d3iflib.Tests", "Tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kelson.d3iflib.ManualTest", "Demo\Kelson.d3iflib.ManualTest\Kelson.d3iflib.ManualTest.csproj", "{A192CE52-9A74-4BC8-9E2B-62E32BC9CF35}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoutingDemo_CliArgs", "Demo\RoutingDemo_CliArgs\RoutingDemo_CliArgs.csproj", "{B035414E-0E05-477F-ADC8-BDF3A1D30AD9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoutingDemo_CliArgs", "Demo\RoutingDemo_CliArgs\RoutingDemo_CliArgs.csproj", "{B035414E-0E05-477F-ADC8-BDF3A1D30AD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebRoutingDemo", "Demo\WebRoutingDemo\WebRoutingDemo.csproj", "{E934F7E7-F040-4310-95FD-85632D883303}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRoutingDemo", "Demo\WebRoutingDemo\WebRoutingDemo.csproj", "{E934F7E7-F040-4310-95FD-85632D883303}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kelson.Common.Postgres", "Kelson.Common.Postgres\Kelson.Common.Postgres.csproj", "{7F4D99C3-1027-44AF-B645-9D90D56A81D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -185,6 +187,18 @@ Global
 		{E934F7E7-F040-4310-95FD-85632D883303}.Release|x64.Build.0 = Release|Any CPU
 		{E934F7E7-F040-4310-95FD-85632D883303}.Release|x86.ActiveCfg = Release|Any CPU
 		{E934F7E7-F040-4310-95FD-85632D883303}.Release|x86.Build.0 = Release|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Debug|x64.Build.0 = Debug|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Debug|x86.Build.0 = Debug|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Release|x64.ActiveCfg = Release|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Release|x64.Build.0 = Release|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Release|x86.ActiveCfg = Release|Any CPU
+		{7F4D99C3-1027-44AF-B645-9D90D56A81D0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
