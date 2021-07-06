@@ -7,7 +7,6 @@
 		<Authors>Kelson Ball</Authors>
 		<Product />
 		<Company />
-		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<RepositoryUrl>https://github.com/kelson-dev/Common</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
