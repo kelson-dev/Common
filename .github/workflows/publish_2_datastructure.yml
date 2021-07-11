@@ -35,7 +35,7 @@ jobs:
           VERSION_REGEX: ^\s*<Version>(.*)<\/Version>\s*$
 
           # Format of the git tag, [*] gets replaced with actual version
-          TAG_FORMAT: v*
+          TAG_FORMAT: Kelson.Common.DataStructures-*
 
           # API key to authenticate with NuGet server
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
