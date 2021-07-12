@@ -21,7 +21,7 @@ namespace Kelson.Common.Postgres.Generators
             if (syntaxNode is RecordDeclarationSyntax dec)
             {
                 recordDec = dec;
-                
+
                 var entityInterfaceBaseType = recordDec.BaseList?.Types.Select(t => t as SimpleBaseTypeSyntax)
                     .FirstOrDefault(t => t?.Type is GenericNameSyntax nameSyntax && nameSyntax.Identifier.Text == "IPostgresEntity");
 
@@ -42,7 +42,7 @@ namespace Kelson.Common.Postgres.Generators
             {
                 if (!recordDec.Modifiers.Any(mod => mod.IsKind(SyntaxKind.PartialKeyword)))
                     return;
-                
+
                 var ancestor = recordDec.FirstAncestorOrSelf<CompilationUnitSyntax>();
                 var usings = ancestor.DescendantNodes()
                     .Where(n => n is UsingDirectiveSyntax)
@@ -55,8 +55,8 @@ namespace Kelson.Common.Postgres.Generators
                     string.Join(".", recordDec.Ancestors().Where(n => n is NamespaceDeclarationSyntax).Select(n => (NamespaceDeclarationSyntax)n).Select(nsd => nsd.Name.ToString()));
                 NewRecordDeclarations.Add(
                     $"{recordDec.Identifier.ValueText}DefaultCtor",
-                    BuildRecord(recordDec, usings, qualifiedNames, 
-                        keyMethod, 
+                    BuildRecord(recordDec, usings, qualifiedNames,
+                        keyMethod,
                         withIdMethod));
             }
             else if (syntaxNode is ClassDeclarationSyntax classDec)
@@ -91,7 +91,14 @@ namespace Kelson.Common.Postgres.Generators
                                         SyntaxFactory.Token(SyntaxKind.OpenBraceToken))
                                     .WithMembers(SyntaxFactory.List(members.Append(
                                         SyntaxFactory.ConstructorDeclaration(recordDec.Identifier)
-                                            .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
+                                            .WithModifiers(SyntaxFactory.TokenList(
+                                                SyntaxFactory.Token(
+                                                    SyntaxFactory.TriviaList(SyntaxFactory.Trivia(
+                                                        SyntaxFactory.PragmaWarningDirectiveTrivia(SyntaxFactory.Token(SyntaxKind.DisableKeyword), true)
+                                                        .WithErrorCodes(SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
+                                                                SyntaxFactory.IdentifierName("CS8625"))))),
+                                                    SyntaxKind.PublicKeyword,
+                                                    SyntaxFactory.TriviaList())))
                                             .WithInitializer(
                                                 SyntaxFactory.ConstructorInitializer(
                                                     SyntaxKind.ThisConstructorInitializer,
@@ -103,74 +110,78 @@ namespace Kelson.Common.Postgres.Generators
                                                                         SyntaxKind.DefaultLiteralExpression,
                                                                         SyntaxFactory.Token(SyntaxKind.DefaultKeyword))))
                                                             .ToArray()))))
-                                            .WithBody(SyntaxFactory.Block()))))
+                                            .WithBody(SyntaxFactory.Block())
+                                        .WithTrailingTrivia(SyntaxFactory.Trivia(
+                                            SyntaxFactory.PragmaWarningDirectiveTrivia(SyntaxFactory.Token(SyntaxKind.RestoreKeyword), true)
+                                            .WithErrorCodes(SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
+                                                SyntaxFactory.IdentifierName("CS8625"))))))))
                             .WithCloseBraceToken(SyntaxFactory.Token(SyntaxKind.CloseBraceToken))}))))
                     .NormalizeWhitespace();
 
-        private Func<Dictionary<string, SyntaxReference>, CompilationUnitSyntax> MakeContextAwareBuilder(ClassDeclarationSyntax classDec, SimpleBaseTypeSyntax pkType) =>
-            (Dictionary<string, SyntaxReference> context) =>
-            {
-                var entityName = (pkType.Type as GenericNameSyntax).TypeArgumentList.Arguments.First();
-                var idType = (pkType.Type as GenericNameSyntax).TypeArgumentList.Arguments.Last();
-
-                if (context.TryGetValue(entityName.ToString(), out SyntaxReference @ref))
-                {
-                    var record = (RecordDeclarationSyntax)@ref.GetSyntax();
-                    var table = ToTableName(record.Identifier.Text);
-                    var parameters = record.ParameterList.Parameters.Select(p => (p.Type, p.Identifier.Text, ToColumnName(p.Identifier.Text))).ToArray();
-
-                    var ancestor = classDec.FirstAncestorOrSelf<CompilationUnitSyntax>();
-                    var usings = ancestor.DescendantNodes()
-                        .Where(n => n is UsingDirectiveSyntax)
-                        .Select(node => (UsingDirectiveSyntax)node)
-                        .ToArray();
-
-                    GeneratorTypeInfo[] columns = record?.ParameterList.Parameters.Select(p => new GeneratorTypeInfo(p)).ToArray() ?? Array.Empty<GeneratorTypeInfo>();
-                    var idTypes = new IdTypeInfo(columns, idType);
-                    string qualifiedNames =
-                    string.Join(".", classDec.Ancestors().Where(n => n is NamespaceDeclarationSyntax).Select(n => (NamespaceDeclarationSyntax)n).Select(nsd => nsd.Name.ToString()));
-
-                    return SyntaxFactory.CompilationUnit()
-                        .WithUsings(SyntaxFactory.List(usings))
-                        .WithMembers(
-                         SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
-                            SyntaxFactory.NamespaceDeclaration(
-                                SyntaxFactory.ParseName(qualifiedNames))
-                            .WithMembers(
-                                SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
-                                    SyntaxFactory.ClassDeclaration(classDec.Identifier)
-                                    .WithModifiers(SyntaxFactory.TokenList(new[] { SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.PartialKeyword) }))
-                                    .WithMembers(
-                                        SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
-                                            RepositorySqlBuilders.SqlQueriesProperty(record, columns, idTypes)))))))
-                        .NormalizeWhitespace();
-                }
-                else
-                {
-                    throw new NotImplementedException($"Could not find entity record for {classDec}");
-                }
-            };
-
-        
-
-        private (MethodDeclarationSyntax getKey, MethodDeclarationSyntax withId) KeySetterAndWithIdMethods(RecordDeclarationSyntax rec, SimpleBaseTypeSyntax bts)
+    private Func<Dictionary<string, SyntaxReference>, CompilationUnitSyntax> MakeContextAwareBuilder(ClassDeclarationSyntax classDec, SimpleBaseTypeSyntax pkType) =>
+        (Dictionary<string, SyntaxReference> context) =>
         {
-            GeneratorTypeInfo[] columns = rec?.ParameterList.Parameters.Select(p => new GeneratorTypeInfo(p)).ToArray() ?? Array.Empty<GeneratorTypeInfo>();
-            var idType = (bts.Type as GenericNameSyntax).TypeArgumentList.Arguments.Last();
-            var idTypes = new IdTypeInfo(columns, idType);
+            var entityName = (pkType.Type as GenericNameSyntax).TypeArgumentList.Arguments.First();
+            var idType = (pkType.Type as GenericNameSyntax).TypeArgumentList.Arguments.Last();
 
-            if (idType is TupleTypeSyntax tupleType)
-                return (EntityRecordMethodBuilders.BuildKeyGetter(rec, tupleType),
-                        EntityRecordMethodBuilders.BuildWithIdMethod(rec, tupleType));
-            else if (idType is PredefinedTypeSyntax keywordType)
-                return (EntityRecordMethodBuilders.BuildKeyGetter(rec, keywordType),
-                            EntityRecordMethodBuilders.BuildWithIdMethod(rec, keywordType));
+            if (context.TryGetValue(entityName.ToString(), out SyntaxReference @ref))
+            {
+                var record = (RecordDeclarationSyntax)@ref.GetSyntax();
+                var table = ToTableName(record.Identifier.Text);
+                var parameters = record.ParameterList.Parameters.Select(p => (p.Type, p.Identifier.Text, ToColumnName(p.Identifier.Text))).ToArray();
 
-            else if (idType is IdentifierNameSyntax idName)
-                return (EntityRecordMethodBuilders.BuildKeyGetter(rec, idName),
-                            EntityRecordMethodBuilders.BuildWithIdMethod(rec, idName));
+                var ancestor = classDec.FirstAncestorOrSelf<CompilationUnitSyntax>();
+                var usings = ancestor.DescendantNodes()
+                    .Where(n => n is UsingDirectiveSyntax)
+                    .Select(node => (UsingDirectiveSyntax)node)
+                    .ToArray();
+
+                GeneratorTypeInfo[] columns = record?.ParameterList.Parameters.Select(p => new GeneratorTypeInfo(p)).ToArray() ?? Array.Empty<GeneratorTypeInfo>();
+                var idTypes = new IdTypeInfo(columns, idType);
+                string qualifiedNames =
+                string.Join(".", classDec.Ancestors().Where(n => n is NamespaceDeclarationSyntax).Select(n => (NamespaceDeclarationSyntax)n).Select(nsd => nsd.Name.ToString()));
+
+                return SyntaxFactory.CompilationUnit()
+                    .WithUsings(SyntaxFactory.List(usings))
+                    .WithMembers(
+                     SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
+                        SyntaxFactory.NamespaceDeclaration(
+                            SyntaxFactory.ParseName(qualifiedNames))
+                        .WithMembers(
+                            SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
+                                SyntaxFactory.ClassDeclaration(classDec.Identifier)
+                                .WithModifiers(SyntaxFactory.TokenList(new[] { SyntaxFactory.Token(SyntaxKind.PublicKeyword), SyntaxFactory.Token(SyntaxKind.PartialKeyword) }))
+                                .WithMembers(
+                                    SyntaxFactory.SingletonList<MemberDeclarationSyntax>(
+                                        RepositorySqlBuilders.SqlQueriesProperty(record, columns, idTypes)))))))
+                    .NormalizeWhitespace();
+            }
             else
-                throw new NotImplementedException(idType.GetType().ToString());
-        }
+            {
+                throw new NotImplementedException($"Could not find entity record for {classDec}");
+            }
+        };
+
+
+
+    private (MethodDeclarationSyntax getKey, MethodDeclarationSyntax withId) KeySetterAndWithIdMethods(RecordDeclarationSyntax rec, SimpleBaseTypeSyntax bts)
+    {
+        GeneratorTypeInfo[] columns = rec?.ParameterList.Parameters.Select(p => new GeneratorTypeInfo(p)).ToArray() ?? Array.Empty<GeneratorTypeInfo>();
+        var idType = (bts.Type as GenericNameSyntax).TypeArgumentList.Arguments.Last();
+        var idTypes = new IdTypeInfo(columns, idType);
+
+        if (idType is TupleTypeSyntax tupleType)
+            return (EntityRecordMethodBuilders.BuildKeyGetter(rec, tupleType),
+                    EntityRecordMethodBuilders.BuildWithIdMethod(rec, tupleType));
+        else if (idType is PredefinedTypeSyntax keywordType)
+            return (EntityRecordMethodBuilders.BuildKeyGetter(rec, keywordType),
+                        EntityRecordMethodBuilders.BuildWithIdMethod(rec, keywordType));
+
+        else if (idType is IdentifierNameSyntax idName)
+            return (EntityRecordMethodBuilders.BuildKeyGetter(rec, idName),
+                        EntityRecordMethodBuilders.BuildWithIdMethod(rec, idName));
+        else
+            throw new NotImplementedException(idType.GetType().ToString());
     }
+}
 }
