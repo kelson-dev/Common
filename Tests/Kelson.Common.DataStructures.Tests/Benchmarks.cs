@@ -1,9 +1,6 @@
-﻿using FluentAssertions;
-using Kelson.Common.DataStructures.Sets;
+﻿using Kelson.Common.DataStructures.Sets;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Linq;
-using Xunit;
 
 namespace Kelson.Common.DataStructures.Tests
 {
@@ -127,7 +124,7 @@ namespace Kelson.Common.DataStructures.Tests
             timer.Stop();
             double time2 = timer.Elapsed.TotalMilliseconds;
 
-            var ratio = time1 / time2;
+            double ratio = time1 / time2;
 
             time2.Should().BeLessThan(time1);
         }

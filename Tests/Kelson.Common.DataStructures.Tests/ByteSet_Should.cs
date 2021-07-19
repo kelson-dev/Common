@@ -1,10 +1,5 @@
-﻿using FluentAssertions;
-using Kelson.Common.DataStructures.Sets;
-using System;
-using System.Collections.Generic;
+﻿using Kelson.Common.DataStructures.Sets;
 using System.Diagnostics;
-using System.Linq;
-using Xunit;
 
 namespace Kelson.Common.DataStructures.Tests
 {
@@ -36,16 +31,16 @@ namespace Kelson.Common.DataStructures.Tests
         [Fact]
         public void Except()
         {
-            var a = new byte[] { 0, 50, 100, 150, 200, 250 };
+            byte[] a = new byte[] { 0, 50, 100, 150, 200, 250 };
             var test1 = new ByteSet(a);
             var compare1 = new SortedSet<byte>(a);
 
-            var b = new byte[] { 50, 200, 250 };
+            byte[] b = new byte[] { 50, 200, 250 };
             var test2 = new ByteSet(b);
             var compare2 = new SortedSet<byte>(b);
 
             compare1.ExceptWith(compare2);
-            var expected = compare1.ToArray();
+            byte[] expected = compare1.ToArray();
             var result = test1.Except(test2);
             result.Should().BeEquivalentTo(expected);
         }
@@ -60,7 +55,7 @@ namespace Kelson.Common.DataStructures.Tests
 
                 var expectedSet = new SortedSet<byte>(compare1);
                 expectedSet.ExceptWith(compare2);
-                var expected = expectedSet.ToArray();
+                byte[] expected = expectedSet.ToArray();
                 var result = test1.Except(test2);
                 result.Should().BeEquivalentTo(expected);
             }
@@ -69,16 +64,16 @@ namespace Kelson.Common.DataStructures.Tests
         [Fact]
         public void SymmetricExcept()
         {
-            var a = new byte[] { 0, 50, 100, 150, 200, 250 };
+            byte[] a = new byte[] { 0, 50, 100, 150, 200, 250 };
             var test1 = new ByteSet(a);
             var compare1 = new SortedSet<byte>(a);
 
-            var b = new byte[] { 50, 200, 250 };
+            byte[] b = new byte[] { 50, 200, 250 };
             var test2 = new ByteSet(b);
             var compare2 = new SortedSet<byte>(b);
 
             compare1.SymmetricExceptWith(compare2);
-            var expected = compare1.ToArray();
+            byte[] expected = compare1.ToArray();
             var result = test1.SymmetricExcept(test2);
             result.Should().BeEquivalentTo(expected);
         }
@@ -93,7 +88,7 @@ namespace Kelson.Common.DataStructures.Tests
 
                 var expectedSet = new SortedSet<byte>(compare1);
                 expectedSet.SymmetricExceptWith(compare2);
-                var expected = expectedSet.ToArray();
+                byte[] expected = expectedSet.ToArray();
                 var result = test1.SymmetricExcept(test2);
                 if (!result.SequenceEqual(expected))
                     Debugger.Break();
@@ -111,7 +106,7 @@ namespace Kelson.Common.DataStructures.Tests
 
                 var expectedSet = new SortedSet<byte>(compare1);
                 expectedSet.IntersectWith(compare2);
-                var expected = expectedSet.ToArray();
+                byte[] expected = expectedSet.ToArray();
                 var result = test1.Intersect(test2);
                 result.Should().BeEquivalentTo(expected);
             }
@@ -127,7 +122,7 @@ namespace Kelson.Common.DataStructures.Tests
 
                 var expectedSet = new SortedSet<byte>(compare1);
                 expectedSet.UnionWith(compare2);
-                var expected = expectedSet.ToArray();
+                byte[] expected = expectedSet.ToArray();
                 var result = test1.Union(test2);
                 result.Should().BeEquivalentTo(expected);
             }

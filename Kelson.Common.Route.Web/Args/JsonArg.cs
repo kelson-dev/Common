@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Text.Json;
 
@@ -12,6 +13,11 @@ namespace Kelson.Common.Route.Web.Args
         private readonly JsonSerializerOptions options;
 
         public JsonArg(JsonSerializerOptions options) => this.options = options;
+
+        public override string Description { get; }
+        public override string Syntax { get; }
+
+        public override IEnumerable<string> Examples() => throw new NotImplementedException();
 
         public override bool Matches(HttpContext context, ref ReadOnlySpan<char> text, out T result)
         {

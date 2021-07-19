@@ -1,12 +1,5 @@
-﻿using FluentAssertions;
-using Kelson.Common.DataStructures.Concurrent;
-using System;
-using System.Collections.Generic;
+﻿using Kelson.Common.DataStructures.Concurrent;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace Kelson.Common.DataStructures.Tests
 {
@@ -16,7 +9,7 @@ namespace Kelson.Common.DataStructures.Tests
         [MemberData(nameof(SetsWithMinAndNextMinData))]
         public void TakeMinItem(ConcurrentSortedQueue<int> queue, int min, int nextMin)
         {
-            var initialCount = queue.Count;
+            int initialCount = queue.Count;
             var (found, first) = queue.TryTakeMin();
             var (_, second) = queue.TryPeekMin();
             found.Should().BeTrue();
@@ -29,7 +22,7 @@ namespace Kelson.Common.DataStructures.Tests
         [MemberData(nameof(SetsWithMaxAndNextMaxData))]
         public void TakeMaxItem(ConcurrentSortedQueue<int> queue, int max, int nextMax)
         {
-            var initialCount = queue.Count;
+            int initialCount = queue.Count;
             var (found, first) = queue.TryTakeMax();
             var (_, second) = queue.TryPeekMax();
             found.Should().BeTrue();
@@ -92,7 +85,7 @@ namespace Kelson.Common.DataStructures.Tests
         private static (T[], T min, T nextMin, T max, T nextMax) RandomDateTimeSet<T>(Random rng, int minCount, int maxCount, Func<int, T> factory) where T : IComparable<T>
         {
             var center = factory(0);
-            var count = rng.Next(minCount, maxCount);
+            int count = rng.Next(minCount, maxCount);
             var results = new T[count];
             var found = ImmutableSortedSet<T>.Empty.Add(center).ToBuilder();
             results[0] = center;
