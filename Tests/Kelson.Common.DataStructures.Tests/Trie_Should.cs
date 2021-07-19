@@ -1,8 +1,4 @@
-﻿using FluentAssertions;
-using Kelson.Common.DataStructures.Text;
-using System;
-using System.Linq;
-using Xunit;
+﻿using Kelson.Common.DataStructures.Text;
 
 namespace Kelson.Common.DataStructures.Tests
 {

@@ -1,8 +1,4 @@
-﻿using FluentAssertions;
-using Kelson.Common.DataStructures.Sets;
-using System;
-using Xunit;
-using System.Linq;
+﻿using Kelson.Common.DataStructures.Sets;
 using System.Collections.Immutable;
 using System.Diagnostics;
 
@@ -148,7 +144,7 @@ namespace Kelson.Common.DataStructures.Tests
         [Fact]
         public void DetermineProperSubsetOfEnumerable()
         {
-            var seta = new int[] { 1, 2, 4, 8, 16, 32 };
+            int[] seta = new int[] { 1, 2, 4, 8, 16, 32 };
             IImmutableSet<int> setb = new ImmutableSet64().Add(1, 2, 3, 4, 5);
             IImmutableSet<int> setc = new ImmutableSet64().Add(1, 2, 4);
 
@@ -184,7 +180,7 @@ namespace Kelson.Common.DataStructures.Tests
         {
             IImmutableSet<int> seta = new ImmutableSet64().Add(1, 2, 4, 8, 16, 32);
             var setb = Enumerable.Range(1, 5);
-            var setc = new int[]{ 1, 2, 4 };
+            int[] setc = new int[]{ 1, 2, 4 };
 
             // proper superset should contain all values in subset
             seta.IsProperSupersetOf(setb).Should().BeFalse();
@@ -286,9 +282,9 @@ namespace Kelson.Common.DataStructures.Tests
             Random r = new Random();
             for (int i = 0; i < ROUNDS; i++)
             {
-                var count = (r.Next() % 64) + 1;
+                int count = (r.Next() % 64) + 1;
                 var values = Enumerable.Range(0, count).Select(_ => r.Next() % 64).OrderBy(v => v).Distinct().ToList();
-                var actual = values.Count;
+                int actual = values.Count;
                 var set = new ImmutableSet64().AddRange(values);
                 set.Count.Should().Be(actual);
                 set.EnumerateAndCount.Should().Be(actual);
